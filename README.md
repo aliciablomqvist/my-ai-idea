@@ -25,8 +25,10 @@ Millions of animals enter shelters each year. Adopters often browse randomly; sh
 _Users_: public adopters and shelter staff.  
 _Context_: mobile-friendly web app.  
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg" width="300">
-<img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Brooks_Chase_Ranger_of_Jolly_Dogs_Jack_Russell.jpg" width="300">
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg" width="300">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Brooks_Chase_Ranger_of_Jolly_Dogs_Jack_Russell.jpg" width="300">
+</p>
 
 ## Data sources and AI methods
 **Data**
