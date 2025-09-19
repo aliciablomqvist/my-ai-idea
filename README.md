@@ -87,10 +87,14 @@ rank = [cand_idx[i] for i in np.argsort(-scores)]
 - Partnerships with 1–2 local shelters for a supervised pilot and outcome tracking.
 
 
-## Data sources and AI methods (quick table)
------------------------------------------
+## Data sources and AI methods
 
-SourceFieldsNotesPetfinder APIspecies, size, age, tags, photos, statuscaching; respect TOSAdopter formneeds/preferences, constraintsminimal PII, consentEmbeddingsSBERT/CLIPHF models; CPU-friendly
+| Source        | Fields                                   | Notes                 |
+|---------------|-------------------------------------------|-----------------------|
+| Petfinder API | species, size, age, tags, photos, status | caching; respect TOS  |
+| Adopter form  | needs/preferences, constraints            | minimal PII, consent  |
+| Embeddings    | SBERT/CLIP                                | HF models; CPU-friendly |
+
 
 ## Acknowledgments
 
