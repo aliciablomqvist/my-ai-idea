@@ -25,7 +25,7 @@ Millions of animals enter shelters each year. Adopters often browse randomly; sh
 _Users_: public adopters and shelter staff.  
 _Context_: mobile-friendly web app.  
 
-![Cat](https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg)
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg" width="300">
 
 ## Data sources and AI methods
 **Data**
@@ -84,7 +84,7 @@ rank = [cand_idx[i] for i in np.argsort(-scores)]
 - Partnerships with 1–2 local shelters for a supervised pilot and outcome tracking.
 
 
-##Data sources and AI methods (quick table)
+## Data sources and AI methods (quick table)
 -----------------------------------------
 
 SourceFieldsNotesPetfinder APIspecies, size, age, tags, photos, statuscaching; respect TOSAdopter formneeds/preferences, constraintsminimal PII, consentEmbeddingsSBERT/CLIPHF models; CPU-friendly
