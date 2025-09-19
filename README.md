@@ -1,75 +1,97 @@
-# My AI idea
+# ShelterMatch
 
 Final project for the Building AI course
 
 ## Summary
 
-Building AI course project. Describe briefly in 2-3 sentences what your project is about. About 250 characters is a nice length! 
+ShelterMatch recommends adoptable pets to people based on **profile preferences** and **pet profiles (text + images)**. It uses embeddings and a learning-to-rank model to surface pets that best fit a household’s needs, helping shelters reduce length-of-stay and increase successful adoptions.
 
 
 ## Background
 
-Which problems does your idea solve? How common or frequent is this problem? What is your personal motivation? Why is this topic important or interesting?
-
-This is how you make a list, if you need one:
-* problem 1
-* problem 2
-* etc.
-
+Millions of animals enter shelters each year. Adopters often browse randomly; shelters manually “match” based on experience. This is time-consuming and can overlook great fits (e.g., shy pets for quiet homes). An AI-assisted recommender can:
+- Improve **discovery** for overlooked animals.
+- Reduce **time-to-adoption** and **return rates** (better fit).
+- Help staff prioritize outreach when a strong match appears.
 
 ## How is it used?
 
-Describe the process of using the solution. In what kind situations is the solution needed (environment, time, etc.)? Who are the users, what kinds of needs should be taken into account?
+1. **Adopter profile** (5–10 quick questions): home type, yard, kids/other pets, activity level, grooming tolerance, allergies, size/age preferences, training expectations, location & radius.
+2. **Inventory sync** from shelter APIs (e.g., Petfinder): pet species, breed mix, size, age, sex, compatibility flags, medical/behavior notes, photos.
+3. **Ranking**: compute similarity between adopter needs and pet profiles (text + image features), then apply a learned re-ranker that incorporates adoption likelihood and shelter constraints (distance, special needs).
+4. **Recommendations UI**: a web page for adopters with filters, reasons (“Loves quiet homes; low-shedding”), and contact/visit flow. A staff dashboard highlights priority matches.
+5. **Feedback loop**: saves/likes, inquiries, and adoption outcomes refine the model.
 
-Images will make your README look nice!
-Once you upload an image to your repository, you can link link to it like this (replace the URL with file path, if you've uploaded an image to Github.)
-![Cat](https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg)
+_Users_: public adopters and shelter staff.  
+_Context_: mobile-friendly web app.  
 
-If you need to resize images, you have to use an HTML tag, like this:
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg" width="300">
-
-This is how you create code examples:
-```
-def main():
-   countries = ['Denmark', 'Finland', 'Iceland', 'Norway', 'Sweden']
-   pop = [5615000, 5439000, 324000, 5080000, 9609000]   # not actually needed in this exercise...
-   fishers = [1891, 2652, 3800, 11611, 1757]
-
-   totPop = sum(pop)
-   totFish = sum(fishers)
-
-   # write your solution here
-
-   for i in range(len(countries)):
-      print("%s %.2f%%" % (countries[i], 100.0))    # current just prints 100%
-
-main()
-```
-
+![ShelterMatch mockup](/images/sheltermatch_mock.png)
 
 ## Data sources and AI methods
-Where does your data come from? Do you collect it yourself or do you use data collected by someone else?
-If you need to use links, here's an example:
-[Twitter API](https://developer.twitter.com/en/docs)
+**Data**
+- **Pet data**: Petfinder API (profiles, attributes, media, location, status).
+- **Adopter data**: voluntary questionnaire; minimal PII (email for follow-up).
+- **Auxiliary**: city/ZIP geocoding, shelter metadata (hours, policies).
 
-| Syntax      | Description |
-| ----------- | ----------- |
-| Header      | Title       |
-| Paragraph   | Text        |
+**Features**
+- **Text**: pet descriptions, tags → sentence embeddings (e.g., SBERT).
+- **Images**: pet photos → vision embeddings (e.g., CLIP) + quality heuristics.
+- **Structured**: species, age, size, distance, good-with-kids/pets, energy level.
+- **Adopter**: activity level, home constraints, allergies, preferred size/age.
+
+**Models**
+- **Stage 1 (candidate retrieval)**: cosine similarity between adopter embedding and pet embeddings (text+image fusion, e.g., weighted sum) to get top-N (e.g., 100).
+- **Stage 2 (re-ranking)**: Learning-to-Rank (e.g., LambdaMART / XGBoostRanker) on features such as distance, compatibility matches, historical adoption likelihood, photo quality, novelty/diversity.
+- **Cold start**: rule-based fallback + popularity priors; quickly personalize via clicks/saves.
+
+**Evaluation**
+- Offline: **NDCG@k**, **MRR**, **Precision@k** on historical inquiry/adoption logs; **diversity** and **coverage** metrics.
+- Online (pilot): A/B test for inquiry rate, adoption rate, and length-of-stay.
+
+**Tiny demo sketch (pseudo-Python)**
+```python
+# 1) Build adopter embedding from profile text
+adopter_text = to_text(profile_dict)
+a_emb = sbert.encode([adopter_text])
+
+# 2) Pet embeddings (precomputed)
+P = np.vstack([pets[i].text_emb*0.6 + pets[i].image_emb*0.4 for i in range(len(pets))])
+
+# 3) Candidate retrieval by cosine similarity
+sims = (P @ a_emb.T).ravel() / (np.linalg.norm(P,axis=1)*np.linalg.norm(a_emb))
+cand_idx = sims.argsort()[-100:][::-1]
+
+# 4) Re-rank with features
+X = build_rank_features(adopter=profile, pets=[pets[i] for i in cand_idx])
+scores = ltr_model.predict(X)
+rank = [cand_idx[i] for i in np.argsort(-scores)]
 
 ## Challenges
 
-What does your project _not_ solve? Which limitations and ethical considerations should be taken into account when deploying a solution like this?
+- Bias & fairness: avoid amplifying breed stereotypes or text biases; ensure equal exposure across looks/colors; monitor fairness metrics and provide override tools to staff.
+- Data quality: inconsistent descriptions, missing tags, variable photo quality.
+- Privacy: store minimal adopter data; consent for communications; GDPR/CCPA-aware.
+- API limits: rate limiting and availability; cache and back-off strategies.
+- Dynamic inventory: pets get adopted quickly; frequent refresh required.
 
 ## What next?
 
-How could your project grow and become something even more? What kind of skills, what kind of assistance would you  need to move on? 
+- MVP with public sandbox API keys (Petfinder) and demo embeddings.
+- Add explanations (“Matched because low-energy + apartment-friendly”).
+- Diversity objective (MMR) to avoid near-duplicate suggestions.
+- Staff tools: priority queue for long-stay or special-needs pets.
+- Partnerships with 1–2 local shelters for a supervised pilot and outcome tracking.
 
+
+##Data sources and AI methods (quick table)
+-----------------------------------------
+
+SourceFieldsNotesPetfinder APIspecies, size, age, tags, photos, statuscaching; respect TOSAdopter formneeds/preferences, constraintsminimal PII, consentEmbeddingsSBERT/CLIPHF models; CPU-friendly
 
 ## Acknowledgments
 
-* list here the sources of inspiration 
-* do not use code, images, data etc. from others without permission
-* when you have permission to use other people's materials, always mention the original creator and the open source / Creative Commons licence they've used
-  <br>For example: [Sleeping Cat on Her Back by Umberto Salvagnin](https://commons.wikimedia.org/wiki/File:Sleeping_cat_on_her_back.jpg#filelinks) / [CC BY 2.0](https://creativecommons.org/licenses/by/2.0)
-* etc
+*   Petfinder API and participating shelters.
+    
+*   Open-source tools: Hugging Face Transformers, Sentence-BERT, CLIP, scikit-learn/XGBoost, FastAPI.
+    
+*   Inspiration from humane tech and shelter communities committed to reducing length-of-stay.
