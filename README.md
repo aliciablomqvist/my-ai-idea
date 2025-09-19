@@ -25,7 +25,7 @@ Millions of animals enter shelters each year. Adopters often browse randomly; sh
 _Users_: public adopters and shelter staff.  
 _Context_: mobile-friendly web app.  
 
-![ShelterMatch mockup](/images/sheltermatch_mock.png)
+![Cat](https://upload.wikimedia.org/wikipedia/commons/5/5e/Sleeping_cat_on_her_back.jpg)
 
 ## Data sources and AI methods
 **Data**
@@ -65,6 +65,7 @@ cand_idx = sims.argsort()[-100:][::-1]
 X = build_rank_features(adopter=profile, pets=[pets[i] for i in cand_idx])
 scores = ltr_model.predict(X)
 rank = [cand_idx[i] for i in np.argsort(-scores)]
+```
 
 ## Challenges
 
